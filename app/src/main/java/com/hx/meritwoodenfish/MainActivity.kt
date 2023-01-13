@@ -1,6 +1,7 @@
 package com.hx.meritwoodenfish
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.media.SoundPool
 import android.os.Build
 import android.os.Bundle
@@ -9,6 +10,7 @@ import android.os.VibratorManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.foundation.Image
@@ -76,58 +78,81 @@ class MainActivity : ComponentActivity() {
                         .background(Color.Black)
                 ) {
                     Column {
-                        Text(
-                            text = "累计功德 $allNumber 次",
-                            color = Color.White,
-                            fontSize = 15.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { }
-                                .padding(top = 40.dp),
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "本次功德 $dailyNumber 次",
-                            color = Color.White,
-                            fontSize = 25.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { }
-                                .padding(top = 5.dp),
-                            textAlign = TextAlign.Center
-                        )
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                        NumberTitle(allNumber, dailyNumber)
+                        WoodenFish(
+                            fishSizeAnim,
+                            plusOneBottom,
+                            plusOneAlpha,
+                            plusOneFontSize
                         ) {
-                            Image(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_fish),
-                                contentDescription = "木鱼",
-                                modifier = Modifier
-                                    .size(fishSizeAnim.value)
-                                    .clickable {
-                                        playSound()
-                                        startVibrator()
-                                        dailyNumber++
-                                        allNumber++
-                                        sp
-                                            .edit()
-                                            .putInt("GD_all", allNumber)
-                                            .apply()
-                                    })
-                            Text(
-                                text = "功德 +1",
-                                Modifier
-                                    .padding(bottom = plusOneBottom.value)
-                                    .alpha(plusOneAlpha.value),
-                                color = Color.White,
-                                fontSize = plusOneFontSize.value.sp,
-                            )
+                            playSound()
+                            startVibrator()
+                            dailyNumber++
+                            allNumber++
+                            sp
+                                .edit()
+                                .putInt("GD_all", allNumber)
+                                .apply()
                         }
                     }
                 }
             }
         }
+    }
+
+    @Composable
+    private fun WoodenFish(
+        fishSizeAnim: Animatable<Dp, AnimationVector1D>,
+        plusOneBottom: Animatable<Dp, AnimationVector1D>,
+        plusOneAlpha: Animatable<Float, AnimationVector1D>,
+        plusOneFontSize: Animatable<Float, AnimationVector1D>,
+        clickable: () -> Unit
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_fish),
+                contentDescription = "木鱼",
+                modifier = Modifier
+                    .size(fishSizeAnim.value)
+                    .clickable {
+                        clickable()
+                    })
+            Text(
+                text = "功德 +1",
+                Modifier
+                    .padding(bottom = plusOneBottom.value)
+                    .alpha(plusOneAlpha.value),
+                color = Color.White,
+                fontSize = plusOneFontSize.value.sp,
+            )
+        }
+    }
+
+    @Composable
+    private fun NumberTitle(allNumber: Int, dailyNumber: Int) {
+        Text(
+            text = "累计功德 $allNumber 次",
+            color = Color.White,
+            fontSize = 15.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { }
+                .padding(top = 40.dp),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "本次功德 $dailyNumber 次",
+            color = Color.White,
+            fontSize = 25.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { }
+                .padding(top = 5.dp),
+            textAlign = TextAlign.Center
+        )
     }
 
     val soundPool = SoundPool.Builder().build()
